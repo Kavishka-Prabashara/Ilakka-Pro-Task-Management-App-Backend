@@ -12,10 +12,15 @@ export const register = async (req: Request, res: Response) => {
         });
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
         res.status(201).json({ token });
-    } catch (err) {
-        res.status(400).json({ error: 'Registration failed', details: err });
+    } catch (err: any) {
+        console.error('Registration error:', err); // 👈 logs full Prisma error
+        res.status(400).json({
+            error: 'Registration failed',
+            details: err.message || err, // 👈 send only the useful message
+        });
     }
 };
+
 
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
@@ -26,7 +31,8 @@ export const login = async (req: Request, res: Response) => {
         }
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
         res.json({ token });
-    } catch (err) {
-        res.status(500).json({ error: 'Login failed', details: err });
+    } catch (err: any) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Login failed', details: err.message || err });
     }
 };
