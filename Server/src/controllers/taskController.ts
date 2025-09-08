@@ -11,6 +11,29 @@ export const getTasks = async (req: Request, res: Response) => {
     }
 };
 
+export const toggleTask = async (req: Request, res: Response) => {
+    const userId = (req.user as any).userId;
+    const id = parseInt(req.params.id);
+
+    try {
+        const task = await prisma.task.findUnique({ where: { id } });
+
+        if (!task || task.userId !== userId) {
+            return res.status(404).json({ error: "Task not found" });
+        }
+
+        const updatedTask = await prisma.task.update({
+            where: { id },
+            data: { completed: !task.completed },
+        });
+
+        res.json(updatedTask);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update task", details: err });
+    }
+};
+
+
 export const createTask = async (req: Request, res: Response) => {
     const userId = (req.user as any).userId;
     const { title } = req.body;
